@@ -1,0 +1,31 @@
+#
+# Install prerequisites in a conda environment
+#
+conda create -n openmc-ncrystal -y -c conda-forge ncrystal gemmi spglib jupyter njoy2016 numpy scipy matplotlib pip h5py
+conda activate openmc-ncrystal
+#
+# Compile OpenMC with NCrystal support
+#
+git clone https://github.com/openmc-dev/openmc.git
+mkdir build
+cd build
+cmake  -DOPENMC_USE_NCRYSTAL=on -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../openmc/ 
+make -j 8 install
+cd ../openmc
+pip install .
+cd ..
+#
+# Download nuclear data
+#
+pip install openmc-data
+download_endf -r b7.1 --destination ./data
+#
+# Download the ncmat2endf script to generate ENDF-6 TSL files
+#
+pip install endf-parserpy
+mkdir test
+cd test
+wget https://raw.githubusercontent.com/marquezj/ncmat2endf/main/ncrystal_ncmat2endf.py
+chmod +x ncrystal_ncmat2endf.py
+cd ..
+
